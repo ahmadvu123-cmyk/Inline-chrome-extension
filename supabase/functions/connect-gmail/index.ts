@@ -1,6 +1,7 @@
 import { GMAIL_API_URL } from "../_shared/constants.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { saveUsers } from "../_shared/repositories/user.repository.ts";
+import { errorResponse } from "../_shared/errors/error-response.ts";
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -19,6 +20,11 @@ serve(async (req: any) => {
             }
 
         })
+        if (!userProfile.ok) {
+            throw new Error(
+                `Gmail API failed with status ${userProfile.status}`,
+            );
+        }
         const profile = await userProfile.json();
         console.log("User profile:", profile);
 
@@ -32,11 +38,8 @@ serve(async (req: any) => {
                 'Content-Type': 'application/json'
             }
         });
-    } catch (err: any) {
-        return new Response(JSON.stringify({ error: err.message }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+    } catch (error: any) {
+        return errorResponse(error, corsHeaders);
 
     }
 })

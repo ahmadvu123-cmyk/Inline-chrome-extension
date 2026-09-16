@@ -1,5 +1,4 @@
-import { sendResponse } from "next/dist/server/image-optimizer";
-import { GMAIL_API_URL, SUPABASE_PUBLISHER_KEY, SYNC_GMAIL_URL, CONNECT_GMAIL, SAVE_EMAIL_PATTERNS } from "../constants";
+import { SUPABASE_PUBLISHER_KEY, SYNC_GMAIL_URL, CONNECT_GMAIL } from "../constants";
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.Type === 'Connect_Gmail') {
@@ -35,9 +34,14 @@ async function connectToGmail() {
             gmailAccessToken: accessToken
         })
     })
-    
+
     if (!response.ok) {
-        throw new Error('Failed to fetch user profile');
+        const errorData = await response.json();
+
+        throw new Error(
+            errorData?.error?.message ||
+            'Failed to connect Gmail.'
+        );
     }
     const profile = await response.json();
     console.log("User profile response:", profile);
@@ -68,8 +72,8 @@ async function handleSyncGmail() {
     }
     const { authUserEmail } = await chrome.storage.local.get('authUserEmail');
     console.log("user email service worker", authUserEmail);
-    
-    if(!authUserEmail){
+
+    if (!authUserEmail) {
         throw new Error('Auth user email not found.')
     }
     const response = await fetch(SYNC_GMAIL_URL, {
@@ -85,32 +89,14 @@ async function handleSyncGmail() {
         })
     })
     if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Edge Function Error: ${errorText}`);
-    }
-    
-    const finalResponse =  await response.json();
-    await saveEmailPatterns(finalResponse);
-    return finalResponse;
-}
+        const errorData = await response.json();
 
-async function saveEmailPatterns(emailsData: unknown){
-    if(!emailsData){
-        throw new Error('Emails required to save email patterns')
+        throw new Error(
+            errorData?.error?.message ||
+            'Failed to sync Gmail.'
+        );
     }
-    const response = await fetch(SAVE_EMAIL_PATTERNS, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${SUPABASE_PUBLISHER_KEY}`,
-            'ApiKey': SUPABASE_PUBLISHER_KEY || ''
-        },
-        body: JSON.stringify({
-            emailsData: emailsData
-        })
-    })
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Edge Function Error: ${errorText}`);
-    }
+
+    const finalResponse = await response.json();
+    return finalResponse;
 }

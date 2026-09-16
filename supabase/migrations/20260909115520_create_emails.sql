@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS "emails" (
     sender TEXT NOT NULL,
     receiver TEXT NOT NULL, 
     email_history_id TEXT NOT NULL,
+    cc TEXT NOT NULL,
+    bcc TEXT NOT NULL,
     date TEXT NOT NULL,
     thread_id TEXT NOT NULL,
     lables TEXT,

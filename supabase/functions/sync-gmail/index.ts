@@ -1,7 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { existingEmails, saveEmails } from "../_shared/repositories/email.repository.ts";
+import { existingEmails, saveEmailPatterns, saveEmails } from "../_shared/repositories/email.repository.ts";
 import { GMAIL_API_URL } from "../_shared/constants.ts";
 import { existingUser } from "../_shared/repositories/user.repository.ts";
+import { generateEmailPatterns } from "../_shared/services/email-service.ts";
+import { errorResponse } from "../_shared/errors/error-response.ts";
 
 
 const corsHeaders = {
@@ -27,28 +29,19 @@ serve(async (req: any) => {
     const { gmailAccessToken, userEmail } = await req.json();
     const existingEmailsList = await existingEmails(userEmail);
     if (existingEmailsList && existingEmailsList.length > 0) {
-      return new Response(JSON.stringify({ message: 'Emails already exist for this user' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      throw new Error('Emails already exists for this user');
     }
     console.log("User Email sync-gmail", userEmail);
 
     console.log('Received gmailAccessToken:', gmailAccessToken);
     if (!gmailAccessToken) {
-      return new Response(JSON.stringify({ error: 'Access token missing' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      throw new Error('Gmail access token is missing')
     }
 
     const authenticatedUser = await existingUser(userEmail);
     console.log("Authenticated User:", authenticatedUser);
     if (!authenticatedUser) {
-      return new Response(JSON.stringify({ error: 'User not found in Database' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      throw new Error("Authenticated user not found");
     }
 
     const ninetyDaysAgo = new Date();
@@ -75,7 +68,7 @@ serve(async (req: any) => {
     const fullThreads = await Promise.all(
       threads.map(async (thread: { id: string }) => {
         const detailRes = await fetch(
-          `${GMAIL_API_URL}/users/me/threads/${thread.id}?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Date`,
+            `${GMAIL_API_URL}/users/me/threads/${thread.id}?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=To&metadataHeaders=CC&metadataHeaders=BCC&metadataHeaders=Date`,
           {
             headers: { Authorization: `Bearer ${gmailAccessToken}` },
           }
@@ -92,6 +85,8 @@ serve(async (req: any) => {
           user_id: authenticatedUser.id,
           sender: getHeader(headers, 'From'),
           receiver: getHeader(headers, 'To'),
+          cc: getHeader(headers, 'CC'),
+          bcc: getHeader(headers, 'BCC'),
           subject: getHeader(headers, 'Subject'),
           date: getHeader(headers, 'Date'),
           labels: message.labelIds || [],
@@ -103,21 +98,19 @@ serve(async (req: any) => {
     );
     console.log("All emails:", emails);
 
-
+    const emailPatternResponseFromLLM = await generateEmailPatterns(emails);
     await saveEmails(emails);
     return new Response(JSON.stringify({
       success: true,
-      threads: emails
+      threads: emails,
+      patterns: emailPatternResponseFromLLM
     }), {
       headers: {
         ...corsHeaders,
         'Content-Type': 'application/json'
       }
     });
-  } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+  } catch (error: any) {
+    return errorResponse(error, corsHeaders);
   }
 });

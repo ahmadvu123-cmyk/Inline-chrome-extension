@@ -15,7 +15,7 @@ export async function existingUser(userEmail: string){
         .maybeSingle();
 
     if (error) {
-        throw new Error(`Error while finding user: ${error.message}`);
+        throw error;
     }
 
     return data;
@@ -41,7 +41,7 @@ export async function saveUsers(userProfile: userProfileInput) {
     ]).select();
 
     if (error) {
-        throw new Error(`Error while inserting user profile: ${error.message}`);
+        throw error;
     }
 
     return data?.[0] ?? null;
