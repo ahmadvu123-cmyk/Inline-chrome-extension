@@ -1,4 +1,4 @@
-import { SUPABASE_PUBLISHER_KEY, SYNC_GMAIL_URL, CONNECT_GMAIL } from "../constants";
+import { SUPABASE_SECRET_KEY, SYNC_GMAIL_URL, CONNECT_GMAIL } from "../constants";
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.Type === 'Connect_Gmail') {
@@ -27,8 +27,8 @@ async function connectToGmail() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${SUPABASE_PUBLISHER_KEY}`,
-            'ApiKey': SUPABASE_PUBLISHER_KEY || ''
+            'Authorization': `Bearer ${SUPABASE_SECRET_KEY}`,
+            'ApiKey': SUPABASE_SECRET_KEY || ''
         },
         body: JSON.stringify({
             gmailAccessToken: accessToken
@@ -80,8 +80,8 @@ async function handleSyncGmail() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${SUPABASE_PUBLISHER_KEY}`,
-            'ApiKey': SUPABASE_PUBLISHER_KEY || ''
+            'Authorization': `Bearer ${SUPABASE_SECRET_KEY}`,
+            'ApiKey': SUPABASE_SECRET_KEY || ''
         },
         body: JSON.stringify({
             gmailAccessToken: gmailAccessToken,

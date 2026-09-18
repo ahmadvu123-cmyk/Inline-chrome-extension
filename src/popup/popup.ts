@@ -1,9 +1,11 @@
-function showToast(message: string) {
+function showToast(message: string, type: 'success' | 'error' = 'error') {
   const toast = document.getElementById('toast');
 
   if (!toast) return;
 
   toast.textContent = message;
+  toast.classList.remove('toast-success', 'toast-error'); // reset previous state
+  toast.classList.add(type === 'success' ? 'toast-success' : 'toast-error');
   toast.classList.add('show');
 
   setTimeout(() => {
@@ -67,11 +69,14 @@ document.addEventListener('DOMContentLoaded', () => {
           showToast(
             chrome.runtime.lastError.message || 'Sync failed.'
           );
+          resultDiv.textContent = '';
+
           return;
         }
 
         if (!syncResponse) {
           showToast('No response from Gmail service.');
+          resultDiv.textContent = '';
           return;
         }
 
@@ -79,13 +84,18 @@ document.addEventListener('DOMContentLoaded', () => {
           showToast(
             syncResponse.error || 'Failed to sync emails.'
           );
+          resultDiv.textContent = '';
+
           return;
         }
 
         showToast(
           syncResponse.data?.message ||
-          'Emails synced successfully!'
+          'Emails synced successfully!',
+          'success'
         );
+        resultDiv.textContent = '';
+
 
         console.log(
           'Response Of Emails',

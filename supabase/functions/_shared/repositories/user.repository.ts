@@ -1,3 +1,4 @@
+import { ERROR_CODES } from "../errors/error-codes.ts";
 import { supabase } from "../supabase-client.ts";
 
 interface userProfileInput {
@@ -15,7 +16,7 @@ export async function existingUser(userEmail: string){
         .maybeSingle();
 
     if (error) {
-        throw error;
+        throw new Error(ERROR_CODES.SUPABASE_QUERY_FAILED);
     }
 
     return data;
@@ -23,7 +24,7 @@ export async function existingUser(userEmail: string){
 
 export async function saveUsers(userProfile: userProfileInput) {
     if (!userProfile || !userProfile.emailAddress) {
-        throw new Error('Invalid User Profile: email is required');
+        throw new Error(ERROR_CODES.VALIDATION_ERROR);
     }
     const user = await existingUser(userProfile.emailAddress);
     if (user) {
@@ -41,7 +42,7 @@ export async function saveUsers(userProfile: userProfileInput) {
     ]).select();
 
     if (error) {
-        throw error;
+        throw new Error(ERROR_CODES.SUPABASE_INSERT_FAILED);
     }
 
     return data?.[0] ?? null;

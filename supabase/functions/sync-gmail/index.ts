@@ -1,9 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { existingEmails, saveEmailPatterns, saveEmails } from "../_shared/repositories/email.repository.ts";
 import { GMAIL_API_URL } from "../_shared/constants.ts";
 import { existingUser } from "../_shared/repositories/user.repository.ts";
-import { generateEmailPatterns } from "../_shared/services/email-service.ts";
+import { generateEmailPatterns, checkExistingEmails, checkSaveEmails } from "../_shared/services/email-service.ts";
 import { errorResponse } from "../_shared/errors/error-response.ts";
+import { ERROR_CODES } from "../_shared/errors/error-codes.ts";
 
 
 const corsHeaders = {
@@ -27,21 +27,24 @@ serve(async (req: any) => {
 
   try {
     const { gmailAccessToken, userEmail } = await req.json();
-    const existingEmailsList = await existingEmails(userEmail);
+    if (!gmailAccessToken) {
+      throw new Error(ERROR_CODES.GMAIL_ACCESS_TOKEN_MISSING);
+    }
+    if(!userEmail){
+      throw new Error(ERROR_CODES.MISSING_REQUIRED_FIELD);
+    }
+    const existingEmailsList = await checkExistingEmails(userEmail);
     if (existingEmailsList && existingEmailsList.length > 0) {
-      throw new Error('Emails already exists for this user');
+      throw new Error(ERROR_CODES.EMAILS_ALREADY_EXISTS);
     }
     console.log("User Email sync-gmail", userEmail);
 
     console.log('Received gmailAccessToken:', gmailAccessToken);
-    if (!gmailAccessToken) {
-      throw new Error('Gmail access token is missing')
-    }
 
     const authenticatedUser = await existingUser(userEmail);
     console.log("Authenticated User:", authenticatedUser);
     if (!authenticatedUser) {
-      throw new Error("Authenticated user not found");
+      throw new Error(ERROR_CODES.USER_NOT_FOUND);
     }
 
     const ninetyDaysAgo = new Date();
@@ -56,6 +59,21 @@ serve(async (req: any) => {
         headers: { Authorization: `Bearer ${gmailAccessToken}` },
       }
     );
+    if (!threadsListRes.ok) {
+      if (threadsListRes.status === 401) {
+        throw new Error(ERROR_CODES.GMAIL_ACCESS_TOKEN_INVALID);
+      }
+
+      if (threadsListRes.status === 403) {
+        throw new Error(ERROR_CODES.GMAIL_PERMISSION_DENIED);
+      }
+
+      if (threadsListRes.status === 429) {
+        throw new Error(ERROR_CODES.GMAIL_API_RATE_LIMIT);
+      }
+
+      throw new Error(ERROR_CODES.GMAIL_THREADS_FETCH_FAILED);
+    }
     const threadsListData = await threadsListRes.json();
     const threads = threadsListData.threads || [];
     console.log("All threads list:", threads);
@@ -68,14 +86,39 @@ serve(async (req: any) => {
     const fullThreads = await Promise.all(
       threads.map(async (thread: { id: string }) => {
         const detailRes = await fetch(
-            `${GMAIL_API_URL}/users/me/threads/${thread.id}?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=To&metadataHeaders=CC&metadataHeaders=BCC&metadataHeaders=Date`,
+          `${GMAIL_API_URL}/users/me/threads/${thread.id}?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=To&metadataHeaders=CC&metadataHeaders=BCC&metadataHeaders=Date`,
           {
-            headers: { Authorization: `Bearer ${gmailAccessToken}` },
+            headers: {
+              Authorization: `Bearer ${gmailAccessToken}`,
+            },
           }
         );
-        return detailRes.json();
+
+        if (!detailRes.ok) {
+          if (detailRes.status === 401) {
+            throw new Error(ERROR_CODES.GMAIL_ACCESS_TOKEN_INVALID);
+          }
+
+          if (detailRes.status === 403) {
+            throw new Error(ERROR_CODES.GMAIL_PERMISSION_DENIED);
+          }
+
+          if (detailRes.status === 404) {
+            throw new Error(ERROR_CODES.GMAIL_THREAD_NOT_FOUND);
+          }
+
+          if (detailRes.status === 429) {
+            throw new Error(ERROR_CODES.GMAIL_API_RATE_LIMIT);
+          }
+
+          throw new Error(ERROR_CODES.GMAIL_THREADS_FETCH_FAILED);
+        }
+
+        return await detailRes.json();
       })
     );
+
+
 
     const emails = fullThreads.flatMap(thread =>
       thread.messages.map((message: any) => {
@@ -99,7 +142,7 @@ serve(async (req: any) => {
     console.log("All emails:", emails);
 
     const emailPatternResponseFromLLM = await generateEmailPatterns(emails);
-    await saveEmails(emails);
+    await checkSaveEmails(emails);
     return new Response(JSON.stringify({
       success: true,
       threads: emails,
@@ -111,6 +154,8 @@ serve(async (req: any) => {
       }
     });
   } catch (error: any) {
+    console.log("Catch Error:", error);
+
     return errorResponse(error, corsHeaders);
   }
 });

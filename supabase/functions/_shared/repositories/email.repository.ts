@@ -1,16 +1,5 @@
+import { ERROR_CODES } from "../errors/error-codes.ts";
 import { supabase } from "../supabase-client.ts";
-
-interface EmailInput {
-    user_id: string,
-    sender: string,
-    receiver: string,
-    subject: string,
-    date: string,
-    labels: string[],
-    thread_Id: string,
-    email_history_id: string,
-    email_message: string
-}
 
 export async function existingEmails(receiverEmail: string) {
     const { data, error } = await supabase
@@ -19,20 +8,20 @@ export async function existingEmails(receiverEmail: string) {
         .eq('receiver', receiverEmail);
 
     if (error) {
-        throw new Error(`Error while finding emails: ${error.message}`);
+        throw new Error(ERROR_CODES.SUPABASE_QUERY_FAILED);
     }
 
     return data;
 }
 
-export async function saveEmails(emails: EmailInput[]){
+export async function saveEmails(emails: unknown){
     if (!emails) {
         throw new Error('Emails data is required');
     }
     const { data, error } = await supabase.from('emails').insert(emails).select();
 
     if (error) {
-        throw new Error(`Error while inserting user profile`);
+        throw new Error(ERROR_CODES.SUPABASE_INSERT_FAILED);
     }
 
     return data;
@@ -41,7 +30,7 @@ export async function saveEmails(emails: EmailInput[]){
 
 export async function saveEmailPatterns(emailPatterns: unknown) {
     if (!emailPatterns) {
-        throw new Error("Email patterns are required");
+        throw new Error(ERROR_CODES.MISSING_REQUIRED_FIELD);
     }
 
     const patterns = emailPatterns as {
@@ -55,15 +44,15 @@ export async function saveEmailPatterns(emailPatterns: unknown) {
     };
 
     if (!patterns.sender?.email) {
-        throw new Error("Sender email is required");
+        throw new Error(ERROR_CODES.MISSING_REQUIRED_FIELD);
     }
 
     if (!patterns.receiver?.email) {
-        throw new Error("Receiver email is required");
+        throw new Error(ERROR_CODES.MISSING_REQUIRED_FIELD);
     }
 
     if (!patterns.response) {
-        throw new Error("Email pattern response is required");
+        throw new Error(ERROR_CODES.MISSING_REQUIRED_FIELD);
     }
 
     const { data, error } = await supabase
@@ -78,7 +67,7 @@ export async function saveEmailPatterns(emailPatterns: unknown) {
 
     if (error) {
         console.error("Failed to save email patterns:", error);
-        throw error;
+        throw new Error(ERROR_CODES.SUPABASE_INSERT_FAILED);
     }
 
     return data;
