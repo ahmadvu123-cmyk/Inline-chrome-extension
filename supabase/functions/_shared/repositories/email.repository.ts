@@ -28,6 +28,20 @@ export async function saveEmails(emails: unknown){
    
 }
 
+export async function existingEmailPatterns(sender: string, receiver: string) {
+    const { data, error } = await supabase
+        .from('email_patterns')
+        .select('*')
+        .eq('sender', sender)
+        .eq('receiver', receiver);
+
+    if (error) {
+        throw new Error(ERROR_CODES.SUPABASE_QUERY_FAILED);
+    }
+
+    return data;
+}
+
 export async function saveEmailPatterns(emailPatterns: unknown) {
     if (!emailPatterns) {
         throw new Error(ERROR_CODES.MISSING_REQUIRED_FIELD);

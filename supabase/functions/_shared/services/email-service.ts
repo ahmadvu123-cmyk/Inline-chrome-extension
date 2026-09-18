@@ -1,6 +1,6 @@
 import { ERROR_CODES } from "../errors/error-codes.ts";
 import { saveEmailPatternPrompt } from "../prompts/save-email-patterns.ts";
-import { saveEmailPatterns, existingEmails, saveEmails } from "../repositories/email.repository.ts";
+import { saveEmailPatterns, existingEmails, saveEmails, existingEmailPatterns } from "../repositories/email.repository.ts";
 import { model } from "./llm-service.ts";
 
 
@@ -55,6 +55,11 @@ export async function generateEmailPatterns(emailsData: unknown) {
     console.log("Sender:", sender);
     console.log("Receiver:", receiver);
     console.log("Pattern response:", patternResponse);
+
+    const checkExistingEmailPatterns = await existingEmailPatterns(sender, receiver);
+    if(checkExistingEmailPatterns){
+      throw new Error(ERROR_CODES.CONFLICT_ERROR);
+    }
 
     const emailRepsonse = await saveEmailPatterns({
       sender,

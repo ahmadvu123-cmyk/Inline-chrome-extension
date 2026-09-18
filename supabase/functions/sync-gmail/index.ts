@@ -141,8 +141,8 @@ serve(async (req: any) => {
     );
     console.log("All emails:", emails);
 
-    const emailPatternResponseFromLLM = await generateEmailPatterns(emails);
     await checkSaveEmails(emails);
+    const emailPatternResponseFromLLM = await generateEmailPatterns(emails);
     return new Response(JSON.stringify({
       success: true,
       threads: emails,
