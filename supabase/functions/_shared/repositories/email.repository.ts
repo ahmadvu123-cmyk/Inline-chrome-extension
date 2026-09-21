@@ -28,14 +28,25 @@ export async function saveEmails(emails: unknown){
    
 }
 
-export async function existingEmailPatterns(sender: string, receiver: string) {
+export async function existingEmailPatterns(
+    sender: string,
+    receiver: string
+) {
     const { data, error } = await supabase
-        .from('email_patterns')
-        .select('*')
-        .eq('sender', sender)
-        .eq('receiver', receiver);
+        .from("email_patterns")
+        .select("id, sender, receiver")
+        .eq("sender", sender.trim().toLowerCase())
+        .eq("receiver", receiver.trim().toLowerCase())
+        .maybeSingle();
 
     if (error) {
+        console.error("Failed to check existing email pattern:", {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code,
+        });
+
         throw new Error(ERROR_CODES.SUPABASE_QUERY_FAILED);
     }
 
@@ -43,44 +54,50 @@ export async function existingEmailPatterns(sender: string, receiver: string) {
 }
 
 export async function saveEmailPatterns(emailPatterns: unknown) {
-    if (!emailPatterns) {
+    if (!emailPatterns || typeof emailPatterns !== "object") {
         throw new Error(ERROR_CODES.MISSING_REQUIRED_FIELD);
     }
 
     const patterns = emailPatterns as {
-        sender?: {
-            email?: string;
-        };
-        receiver?: {
-            email?: string;
-        };
+        sender?: string;
+        receiver?: string;
         response?: unknown;
     };
 
-    if (!patterns.sender?.email) {
+    const sender = patterns.sender?.trim().toLowerCase();
+    const receiver = patterns.receiver?.trim().toLowerCase();
+    const response = patterns.response;
+
+    if (!sender) {
         throw new Error(ERROR_CODES.MISSING_REQUIRED_FIELD);
     }
 
-    if (!patterns.receiver?.email) {
+    if (!receiver) {
         throw new Error(ERROR_CODES.MISSING_REQUIRED_FIELD);
     }
 
-    if (!patterns.response) {
+    if (response === undefined || response === null) {
         throw new Error(ERROR_CODES.MISSING_REQUIRED_FIELD);
     }
 
     const { data, error } = await supabase
         .from("email_patterns")
         .insert({
-            sender: patterns.sender.email,
-            receiver: patterns.receiver.email,
-            pattern: JSON.stringify(patterns.response),
+            sender,
+            receiver,
+            pattern: JSON.stringify(response),
         })
         .select()
         .single();
 
     if (error) {
-        console.error("Failed to save email patterns:", error);
+        console.error("Failed to save email pattern:", {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code,
+        });
+
         throw new Error(ERROR_CODES.SUPABASE_INSERT_FAILED);
     }
 
