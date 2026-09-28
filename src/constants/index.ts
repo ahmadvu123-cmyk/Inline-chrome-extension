@@ -4,10 +4,15 @@ export const SUPABASE_PROJECT_URL =
 export const SUPABASE_SECRET_KEY =
     import.meta.env.VITE_SUPABASE_SECRET_KEY;
 
+export const OPEN_ROUTER_KEY = import.meta.env.VITE_OPEN_ROUTER_KEY;
+
 export const SYNC_GMAIL_URL =
     `${SUPABASE_PROJECT_URL}/functions/v1/sync-gmail`;
 
-export const CONNECT_GMAIL = `${SUPABASE_PROJECT_URL}/functions/v1/connect-gmail`;
+export const CONNECT_GMAIL_URL = `${SUPABASE_PROJECT_URL}/functions/v1/connect-gmail`;
+
+export const ANALYZE_COMPOSE_URL =
+  `${SUPABASE_PROJECT_URL}/functions/v1/analyze-compose`;
 
  
 

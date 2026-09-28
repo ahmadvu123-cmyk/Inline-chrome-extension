@@ -13,9 +13,11 @@
     },
     "permissions": [
         "identity",
-        "storage"
+        "storage",
+        "scripting"
     ],
     "host_permissions": [
+        "https://mail.google.com/*",
         "https://gmail.googleapis.com/*",
         "https://*.supabase.co/*"
     ],

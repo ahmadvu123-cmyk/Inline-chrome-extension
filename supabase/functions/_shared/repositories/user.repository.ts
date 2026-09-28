@@ -1,12 +1,7 @@
 import { ERROR_CODES } from "../errors/error-codes.ts";
 import { supabase } from "../supabase-client.ts";
+import type { UserProfileInput } from "../types/common-types.ts";
 
-interface userProfileInput {
-    emailAddress: string;
-    historyId: string;
-    messagesTotal?: number;
-    threadsTotal?: number;
-}
 
 export async function existingUser(userEmail: string){
     const { data, error } = await supabase
@@ -22,7 +17,7 @@ export async function existingUser(userEmail: string){
     return data;
 }
 
-export async function saveUsers(userProfile: userProfileInput) {
+export async function saveUsers(userProfile: UserProfileInput) {
     if (!userProfile || !userProfile.emailAddress) {
         throw new Error(ERROR_CODES.VALIDATION_ERROR);
     }

@@ -1,24 +1,34 @@
-function showToast(message: string, type: 'success' | 'error' = 'error') {
-  const toast = document.getElementById('toast');
-
-  if (!toast) return;
-
-  toast.textContent = message;
-  toast.classList.remove('toast-success', 'toast-error'); // reset previous state
-  toast.classList.add(type === 'success' ? 'toast-success' : 'toast-error');
-  toast.classList.add('show');
-
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 10000);
-}
+import { showToast } from "../_shared/helpers/show-toast";
 
 document.addEventListener('DOMContentLoaded', () => {
   const syncBtn = document.getElementById('syncBtn') as HTMLButtonElement;
   const connectBtn = document.getElementById('connectBtn') as HTMLButtonElement;
   const resultDiv = document.getElementById('result') as HTMLDivElement;
+  const analyzeBtn = document.getElementById('analyzeBtn') as HTMLButtonElement;
 
   syncBtn.style.display = 'none';
+  analyzeBtn.style.display = 'none';
+
+  chrome.storage.local.get(
+    ['gmailConnected', 'gmailSynced', 'authUserEmail'],
+    (state) => {
+      if (!state.gmailConnected) {
+        connectBtn.style.display = 'block';
+        return;
+      }
+
+      connectBtn.style.display = 'none';
+      resultDiv.textContent = state.gmailSynced
+        ? `Emails already synced for ${state.authUserEmail || 'your Gmail account'}.`
+        : `Connected to ${state.authUserEmail || 'Gmail'}`;
+
+      if (state.gmailSynced) {
+        analyzeBtn.style.display = 'inline-block';
+      } else {
+        syncBtn.style.display = 'block';
+      }
+    }
+  );
 
   connectBtn.addEventListener('click', () => {
     resultDiv.textContent = 'Connecting to Gmail...';
@@ -70,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
             chrome.runtime.lastError.message || 'Sync failed.'
           );
           resultDiv.textContent = '';
-
           return;
         }
 
@@ -80,29 +89,100 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        if (!syncResponse.success) {
+        if (syncResponse.success === true) {
           showToast(
-            syncResponse.error || 'Failed to sync emails.'
+            syncResponse.data?.message ||
+            'Emails synced successfully!',
+            'success'
           );
-          resultDiv.textContent = '';
+
+          markEmailsSynced('Emails synced successfully.');
+
+          return;
+        }
+
+        const conflictMessages = [
+          'Email records for this user already exist in the database, so the requested email data cannot be created again.',
+          'The requested resource already exists and cannot be created again with the same identifier or unique values.',
+          'The request could not be completed because it conflicts with the current state or existing data.',
+          'The requested record already exists and creating another record with the same unique values is not allowed.',
+        ];
+
+        const isConflictError =
+          typeof syncResponse.error === 'string' &&
+          conflictMessages.includes(syncResponse.error);
+
+        if (isConflictError) {
+          showToast(
+            'Emails are already synced. You can analyze your compose.',
+            'success'
+          );
+
+          markEmailsSynced('Emails already synced. You can analyze your compose.');
 
           return;
         }
 
         showToast(
-          syncResponse.data?.message ||
-          'Emails synced successfully!',
-          'success'
+          syncResponse.error || 'Failed to sync emails.'
         );
+
         resultDiv.textContent = '';
-
-
-        console.log(
-          'Response Of Emails',
-          syncResponse.data
-        );
       }
     );
   });
+
+  analyzeBtn.addEventListener('click', async () => {
+    resultDiv.textContent = 'Analyzing open compose...';
+    analyzeBtn.disabled = true;
+
+    chrome.runtime.sendMessage(
+      { action: 'ANALYZE_ACTIVE_COMPOSE' },
+      (response) => {
+        analyzeBtn.disabled = false;
+
+        if (chrome.runtime.lastError) {
+          showToast(
+            chrome.runtime.lastError.message ||
+            'Failed to start compose analysis.'
+          );
+
+          resultDiv.textContent = '';
+          return;
+        }
+
+        if (!response?.success) {
+          showToast(
+            response?.error ||
+            'Failed to analyze the open compose.'
+          );
+
+          resultDiv.textContent = response?.error || 'Analysis failed.';
+          return;
+        }
+
+        resultDiv.textContent = JSON.stringify(response.data, null, 2);
+        showToast('Compose analysis complete.', 'success');
+      }
+    );
+  });
+
+  function markEmailsSynced(message: string) {
+    chrome.storage.local.set(
+      { gmailSynced: true, gmailSyncedAt: Date.now() },
+      () => {
+        if (chrome.runtime.lastError) {
+          showToast('Sync completed, but the extension could not save its sync status.');
+          return;
+        }
+
+        syncBtn.style.display = 'none';
+        analyzeBtn.style.display = 'inline-block';
+        resultDiv.textContent = message;
+      }
+    );
+  }
+
+
 });
 

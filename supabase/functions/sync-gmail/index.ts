@@ -4,21 +4,14 @@ import { existingUser } from "../_shared/repositories/user.repository.ts";
 import { generateEmailPatterns, checkExistingEmails, checkSaveEmails } from "../_shared/services/email-service.ts";
 import { errorResponse } from "../_shared/errors/error-response.ts";
 import { ERROR_CODES } from "../_shared/errors/error-codes.ts";
-
+import { getHeader } from "../_shared/helpers/get-header.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-function getHeader(
-  headers: { name: string; value: string }[],
-  name: string
-) {
-  return headers.find(
-    header => header.name.toLowerCase() === name.toLowerCase()
-  )?.value || '';
-}
+
 
 serve(async (req: any) => {
   if (req.method === 'OPTIONS') {

@@ -9,7 +9,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         popup: path.resolve(__dirname, 'src/popup/popup.html'),
-        background: path.resolve(__dirname, 'src/background/service-worker.ts')
+        background: path.resolve(__dirname, 'src/background/service-worker.ts'),
+        content: path.resolve(__dirname, 'src/content/content-script.ts'),
       },
       output: {
         // JS files ka naam/location decide karta hai
@@ -19,6 +20,9 @@ export default defineConfig({
           }
           if (chunkInfo.name === 'popup') {
             return 'assets/popup.js'; // popup.ts -> assets/popup.js
+          }
+          if (chunkInfo.name === 'content') {
+            return 'content/content-script.js';
           }
           return 'assets/[name].js';
         },
