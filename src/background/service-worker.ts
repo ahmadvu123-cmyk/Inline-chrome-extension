@@ -82,7 +82,7 @@ async function handleSyncGmail() {
     }
 
     if (!gmailConnected) {
-        throw new Error('Please connect your Gmail account first.');
+        throw new Error('Please connect your Gmail account first.'); 
     }
 
     if (!gmailAccessToken) {

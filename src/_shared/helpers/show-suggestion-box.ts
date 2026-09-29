@@ -5,7 +5,8 @@ const PANEL_ATTRIBUTE = "data-gmail-coach-panel";
 
 export function showSuggestionBox(
     compose: HTMLElement,
-    suggestionData: CoachingAnalysis
+    suggestionData: CoachingAnalysis,
+    bodyText: unknown
 ): void {
     compose.querySelector(`[${PANEL_ATTRIBUTE}]`)?.remove();
 
@@ -61,7 +62,7 @@ export function showSuggestionBox(
         accept.className = "accept";
         accept.textContent = "Accept";
         accept.addEventListener("click", () => {
-            if (updateComposeBody(compose, replacement)) host.remove();
+            if (updateComposeBody(compose, replacement, bodyText)) host.remove();
         });
 
         const reject = document.createElement("button");

@@ -19,7 +19,8 @@ export async function analyzeCurrentCompose(compose: HTMLElement) {
     if (!response?.success) {
       throw new Error(response?.error || "Compose analysis failed.");
     }
-    showSuggestionBox(compose, response.data as CoachingAnalysis);
+    const bodyText = data.body.trim();
+    showSuggestionBox(compose, response.data as CoachingAnalysis, bodyText);
     console.log("Coaching:", response.data);
     return response.data;
   } catch (error) {

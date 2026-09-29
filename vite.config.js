@@ -13,13 +13,12 @@ export default defineConfig({
         content: path.resolve(__dirname, 'src/content/content-script.ts'),
       },
       output: {
-        // JS files ka naam/location decide karta hai
         entryFileNames: (chunkInfo) => {
           if (chunkInfo.name === 'background') {
             return 'background/service-worker.js';
           }
           if (chunkInfo.name === 'popup') {
-            return 'assets/popup.js'; // popup.ts -> assets/popup.js
+            return 'assets/popup.js';
           }
           if (chunkInfo.name === 'content') {
             return 'content/content-script.js';
@@ -27,10 +26,9 @@ export default defineConfig({
           return 'assets/[name].js';
         },
         chunkFileNames: 'assets/[name].js',
-        // CSS aur baaki static assets yahan handle hote hain
         assetFileNames: (assetInfo) => {
           if (assetInfo.name && assetInfo.name.endsWith('.css')) {
-            return 'assets/popup.css'; // popup.css -> assets/popup.css
+            return 'assets/popup.css';
           }
           return 'assets/[name][extname]';
         }

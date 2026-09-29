@@ -1,6 +1,7 @@
 export function updateComposeBody(
     compose: HTMLElement,
-    replacement: string
+    replacement: string,
+    bodyText: unknown
 ): boolean {
 
     const body =
@@ -28,7 +29,7 @@ export function updateComposeBody(
         new InputEvent("input", {
             bubbles: true,
             inputType: "insertText",
-            data: replacement,
+            data: bodyText + replacement,
         })
     );
 
