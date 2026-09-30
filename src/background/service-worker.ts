@@ -82,7 +82,7 @@ async function handleSyncGmail() {
     }
 
     if (!gmailConnected) {
-        throw new Error('Please connect your Gmail account first.'); 
+        throw new Error('Please connect your Gmail account first.');
     }
 
     if (!gmailAccessToken) {
@@ -167,41 +167,41 @@ async function analyzeCompose(payload: unknown) {
 }
 
 chrome.runtime.onMessage.addListener(
-  (message, sender, sendResponse) => {
+    (message, sender, sendResponse) => {
 
         if (message.action === 'ANALYZE_ACTIVE_COMPOSE') {
             analyzeActiveCompose()
                 .then((data) => {
                     sendResponse({ success: true, data });
-        })
-        .catch((error: any) => {
-          sendResponse({
-            success: false,
+                })
+                .catch((error: any) => {
+                    sendResponse({
+                        success: false,
                         error: error.message || 'Failed to analyze the Gmail compose.'
-          });
-        });
+                    });
+                });
 
-      return true;
+            return true;
+        }
     }
-  }
 );
 
 async function analyzeActiveCompose(): Promise<unknown> {
-  const tabs = await chrome.tabs.query({
-    url: 'https://mail.google.com/*'
-  });
+    const tabs = await chrome.tabs.query({
+        url: 'https://mail.google.com/*'
+    });
 
-  if (!tabs.length) {
-    throw new Error(
-      'Please open Gmail before analyzing.'
-    );
-  }
+    if (!tabs.length) {
+        throw new Error(
+            'Please open Gmail before analyzing.'
+        );
+    }
 
-  const gmailTab = tabs[0];
+    const gmailTab = tabs[0];
 
-  if (!gmailTab.id) {
-    throw new Error('Gmail tab ID not found.');
-  }
+    if (!gmailTab.id) {
+        throw new Error('Gmail tab ID not found.');
+    }
 
     let result: any;
     try {

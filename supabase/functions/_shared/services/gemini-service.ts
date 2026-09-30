@@ -31,6 +31,7 @@ ${JSON.stringify(
                 sender: compose.sender,
                 recipients: compose.recipients,
                 ccRecipients: compose.ccRecipients,
+                bccRecipients: compose.bccRecipients,
                 subject: compose.subject,
                 body: compose.body,
             },

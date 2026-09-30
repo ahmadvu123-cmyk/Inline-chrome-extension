@@ -20,7 +20,7 @@ export interface EmailInput {
 export interface ComposeRequest {
     composeId: string;
     sender: string;
-    recipients: string | string[];
+    recipients: string[];
     ccRecipients: string[];
     bccRecipients: string[];
     subject: string;
@@ -30,7 +30,8 @@ export interface ComposeRequest {
 export type CoachingIssueType =
     | "VAGUE_REQUEST"
     | "EXCESSIVE_LENGTH"
-    | "MISSING_CONTEXT";
+    | "MISSING_CONTEXT"
+    | "RECIPIENT_SUGGESTION";
 
 export interface CoachingIssue {
     type: CoachingIssueType;
@@ -39,7 +40,13 @@ export interface CoachingIssue {
     suggestion: string;
     action: {
         label: string;
-        replacement: string;
+        replacement?: string;
+        addTo?: string[];
+        removeTo?: string[];
+        addCc?: string[];
+        removeCc?: string[];
+        addBcc?: string[];
+        removeBcc?: string[]
     };
 }
 

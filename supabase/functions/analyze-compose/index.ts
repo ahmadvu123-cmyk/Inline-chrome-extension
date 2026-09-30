@@ -23,7 +23,7 @@ serve(async (req: any) => {
             throw new Error(ERROR_CODES.VALIDATION_ERROR);
         }
         const result = await analyzeCompose(compose);
-        return new Response(
+        const response = new Response(
             JSON.stringify({
                 success: true,
                 data: {
@@ -38,6 +38,9 @@ serve(async (req: any) => {
                 }
             }
         )
+        console.log("Analyze Compose relacement response:", response);
+        return response;
+        
     } catch (error: any) {
         return errorResponse(error, corsHeaders)
     }

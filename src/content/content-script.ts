@@ -1,6 +1,7 @@
 import { scanComposes } from "../_shared/helpers/scan-compose";
 import { findComposeWindow } from "./gmail/compose-detector";
 import { analyzeCurrentCompose } from "../_shared/helpers/analyze-current-compose";
+import { enableComposeAutoAnalysis } from "../_shared/helpers/setup-compose";
 
 const extensionState = globalThis as typeof globalThis & {
 	__gmailComposeAnalyzerStarted?: boolean;
@@ -28,6 +29,7 @@ if (!extensionState.__gmailComposeAnalyzerStarted) {
 			return;
 		}
 
+		enableComposeAutoAnalysis(compose);
 		analyzeCurrentCompose(compose)
 			.then((data) => sendResponse({ success: true, data }))
 			.catch((error: unknown) =>

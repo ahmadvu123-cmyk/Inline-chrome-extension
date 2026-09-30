@@ -4,11 +4,11 @@ import type { CoachingAnalysis } from "../types";
 import { showSuggestionBox } from "./show-suggestion-box";
 
 export async function analyzeCurrentCompose(compose: HTMLElement) {
-  const data = readCompose(compose, getComposeId(compose), "");
-
-  if (data.body.trim().length < 10) {
-    throw new Error("Add at least 10 characters to the email body before analyzing.");
-  }
+  const storedState = await chrome.storage.local.get("authUserEmail");
+  const sender = typeof storedState.authUserEmail === "string"
+    ? storedState.authUserEmail
+    : "";
+  const data = readCompose(compose, getComposeId(compose), sender);
 
   try {
     const response = await chrome.runtime.sendMessage({

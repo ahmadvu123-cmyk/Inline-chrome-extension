@@ -1,7 +1,7 @@
 export interface ComposeData {
     composeId: string;
     sender: string;
-    recipients: string[];
+    recipients: string | string[];
     ccRecipients: string[];
     bccRecipients: string[];
     subject: string;
@@ -11,18 +11,26 @@ export interface ComposeData {
 export type CoachingTypes = 
     | "VAGUE_REQUEST"
     | "EXCESSIVE_LENGTH"
-    | "MISSING_CONTEXT";
+    | "MISSING_CONTEXT"
+    | "RECIPIENT_SUGGESTION";
 
 export interface CoachingIssue {
     type: CoachingTypes;
     title: string;
     message: string;
+    
     suggestion: string;
 
     action: 
     {
         label: string;
-        replacement: string;
+        replacement?: string;
+        addTo?: string[];
+        removeTo?: string[];
+        addCc?: string[];
+        removeCc?: string[];
+        addBcc?: string[];
+        removeBcc?: string[]
     }
 }
 

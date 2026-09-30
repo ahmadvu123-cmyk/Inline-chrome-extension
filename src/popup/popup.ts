@@ -62,6 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
         syncBtn.style.display = 'block';
 
         resultDiv.textContent = `Connected to ${response.email}`;
+        showToast(
+            `Connected to ${response.email}`,
+            'success'
+          );
       }
     );
   });
@@ -161,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        resultDiv.textContent = JSON.stringify(response.data, null, 2);
+        resultDiv.textContent = "Compose analysis complete"
         showToast('Compose analysis complete.', 'success');
       }
     );

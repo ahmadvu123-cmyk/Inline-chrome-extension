@@ -9,15 +9,15 @@ You MUST analyze every qualifying Sender → Receiver pair independently.
 
 IMPORTANT:
 
-* Sender → Receiver is a directional relationship.
-* Sender A → Receiver B is a different relationship from Sender A → Receiver C.
-* Sender A → Receiver B is also different from Sender B → Receiver A.
-* Never merge different Sender → Receiver relationships.
-* Never generalize a pattern from one relationship to another.
-* Never return only one relationship when multiple qualifying relationships exist.
-* Do not stop after analyzing the first pair.
-* Do not select only the most frequent, most recent, or largest relationship.
-* Generate one separate profile for every qualifying Sender → Receiver pair.
+- Sender → Receiver is a directional relationship.
+- Sender A → Receiver B is a different relationship from Sender A → Receiver C.
+- Sender A → Receiver B is also different from Sender B → Receiver A.
+- Never merge different Sender → Receiver relationships.
+- Never generalize a pattern from one relationship to another.
+- Never return only one relationship when multiple qualifying relationships exist.
+- Do not stop after analyzing the first pair.
+- Do not select only the most frequent, most recent, or largest relationship.
+- Generate one separate profile for every qualifying Sender → Receiver pair.
 
 ═══════════════════════════════════════
 CORE OBJECTIVE
@@ -29,7 +29,7 @@ For each unique qualifying Sender → Receiver pair:
 2. Identify the exact receiver email address.
 3. Analyze ONLY the emails relevant to that Sender → Receiver relationship.
 4. Identify the sender's writing style toward that specific receiver.
-5. Identify recipient and CC behavior.
+5. Identify recipient, CC, and BCC behavior.
 6. Identify tone, structure, vocabulary, and punctuation patterns.
 7. Identify topic or purpose-specific variations when sufficient evidence exists.
 8. Analyze thread and response behavior only when supported by the provided data.
@@ -83,12 +83,12 @@ Each relationship must have its own profile.
 
 IMPORTANT:
 
-* sender.email MUST contain only the plain email address.
-* receiver.email MUST contain only the plain email address.
-* Do NOT use Markdown links.
-* Do NOT use mailto links.
-* Do NOT include names inside sender.email or receiver.email.
-* Do NOT add any explanation around email addresses.
+- sender.email MUST contain only the plain email address.
+- receiver.email MUST contain only the plain email address.
+- Do NOT use Markdown links.
+- Do NOT use mailto links.
+- Do NOT include names inside sender.email or receiver.email.
+- Do NOT add any explanation around email addresses.
 
 Correct:
 
@@ -106,10 +106,10 @@ Create a profile for every unique Sender → Receiver pair that has at least one
 
 However:
 
-* If a pair has fewer than 3 relevant emails, its confidence MUST be "Low".
-* Do not discard a pair merely because it has few emails.
-* A low-volume pair may still be returned, but its confidence must accurately reflect the limited evidence.
-* Do not create a profile for a relationship that does not actually exist in the provided data.
+- If a pair has fewer than 3 relevant emails, its confidence MUST be "Low".
+- Do not discard a pair merely because it has few emails.
+- A low-volume pair may still be returned, but its confidence must accurately reflect the limited evidence.
+- Do not create a profile for a relationship that does not actually exist in the provided data.
 
 ═══════════════════════════════════════
 PRIMARY DIRECTION
@@ -147,19 +147,19 @@ For each Sender → Receiver pair, analyze the sender's actual writing style.
 
 Analyze:
 
-* Formality level from 1–5.
-* Overall tone.
-* Greeting style.
-* Opening line style.
-* Body structure.
-* Sign-off style.
-* Sentence length and complexity.
-* Directness versus hedging.
-* Warmth or casualness.
-* Recurring phrases.
-* Relationship-specific vocabulary.
-* Domain-specific terminology.
-* Punctuation habits.
+- Formality level from 1–5.
+- Overall tone.
+- Greeting style.
+- Opening line style.
+- Body structure.
+- Sign-off style.
+- Sentence length and complexity.
+- Directness versus hedging.
+- Warmth or casualness.
+- Recurring phrases.
+- Relationship-specific vocabulary.
+- Domain-specific terminology.
+- Punctuation habits.
 
 Only report patterns supported by the actual emails belonging to that pair.
 
@@ -168,24 +168,24 @@ Do not infer writing style from emails involving other receivers.
 If the evidence is insufficient for a field, use null or an empty array where appropriate.
 
 ═══════════════════════════════════════
-2. RECIPIENT AND CC PATTERN
+2. RECIPIENT, CC, AND BCC PATTERN
 ═══════════════════════════════════════
 
 Analyze recipient behavior using ONLY emails belonging to the current Sender → Receiver pair.
 
 Analyze:
 
-* Additional recipients in the To field.
-* Frequently CC'd people.
-* Number of times each person appears in CC.
-* Percentage of relevant emails in which each CC recipient appears.
-* Whether CC behavior depends on topic, purpose, role, or email type.
-* Whether CC behavior changes between initiating, replying, or escalating.
+- Additional recipients in the To field.
+- Frequently CC'd people and frequently BCC'd people.
+- Number of times each person appears in CC or BCC.
+- Percentage of relevant emails in which each CC/BCC recipient appears.
+- Whether CC/BCC behavior depends on topic, purpose, role, sensitivity, or email type.
+- Whether CC/BCC behavior changes between initiating, replying, or escalating.
 
-For every CC recipient:
+For every CC or BCC recipient:
 
 emailCount =
-number of relevant emails containing that person in CC.
+number of relevant emails containing that person in CC or BCC.
 
 percentage =
 (emailCount / total relevant emails analyzed) × 100.
@@ -199,9 +199,9 @@ percentage = 80
 
 Do NOT guess or estimate these numbers.
 
-Do NOT use CC information from another Sender → Receiver pair.
+Do NOT use CC or BCC information from another Sender → Receiver pair.
 
-Do NOT describe someone as a recommended CC unless the actual mailbox data supports that behavior.
+Do NOT describe someone as a recommended CC or BCC unless the actual mailbox data supports that behavior.
 
 ═══════════════════════════════════════
 3. ADDITIONAL RECIPIENTS
@@ -211,10 +211,10 @@ Identify additional recipients actually present in the analyzed emails.
 
 Do not include:
 
-* invented recipients
-* recipients from unrelated pairs
-* recipients inferred from context
-* people who are not actually present in the source data
+- invented recipients
+- recipients from unrelated pairs
+- recipients inferred from context
+- people who are not actually present in the source data
 
 Use the exact email addresses available in the mailbox data.
 
@@ -226,17 +226,17 @@ Determine whether the sender's communication style changes depending on topic or
 
 Possible categories include:
 
-* Status updates
-* Project discussions
-* Requests
-* Questions
-* Follow-ups
-* Deadlines
-* Escalations
-* Approvals
-* Information sharing
-* Scheduling
-* Casual communication
+- Status updates
+- Project discussions
+- Requests
+- Questions
+- Follow-ups
+- Deadlines
+- Escalations
+- Approvals
+- Information sharing
+- Scheduling
+- Casual communication
 
 Only create a topic variation when there is enough actual evidence.
 
@@ -254,22 +254,22 @@ Analyze thread behavior only when thread information is actually available in th
 
 The source data may contain:
 
-* thread_id
-* sender
-* receiver
-* date
-* email_message
-* email history information
+- thread_id
+- sender
+- receiver
+- date
+- email_message
+- email history information
 
 Possible observations include:
 
-* Tone mirroring.
-* Response style.
-* Conversation structure.
-* Follow-up behavior.
-* Changes in tone after receiving a response.
-* Whether the sender becomes more formal or casual.
-* Whether the sender shortens or expands responses.
+- Tone mirroring.
+- Response style.
+- Conversation structure.
+- Follow-up behavior.
+- Changes in tone after receiving a response.
+- Whether the sender becomes more formal or casual.
+- Whether the sender shortens or expands responses.
 
 The primary profile must still represent:
 
@@ -293,20 +293,20 @@ Use:
 
 High:
 
-* Sufficient email volume.
-* Clear and consistent patterns.
-* Multiple examples supporting the observed behavior.
+- Sufficient email volume.
+- Clear and consistent patterns.
+- Multiple examples supporting the observed behavior.
 
 Medium:
 
-* Moderate email volume.
-* Some patterns are supported but evidence is not fully consistent.
+- Moderate email volume.
+- Some patterns are supported but evidence is not fully consistent.
 
 Low:
 
-* Very few emails.
-* Limited evidence.
-* Weak or inconsistent patterns.
+- Very few emails.
+- Limited evidence.
+- Weak or inconsistent patterns.
 
 MANDATORY RULE:
 
@@ -326,9 +326,9 @@ Generate suggestions only when the analyzed data provides sufficient evidence.
 
 Suggestions may include:
 
-* Preferred opening style.
-* Core message structure.
-* Preferred sign-off style.
+- Preferred opening style.
+- Core message structure.
+- Preferred sign-off style.
 
 Suggestions must describe observed communication patterns.
 
@@ -356,69 +356,71 @@ These rules are mandatory.
 
 3. Never fabricate CC recipients.
 
-4. Never fabricate names.
+4. Never fabricate BCC recipients.
 
-5. Never fabricate email counts.
+5. Never fabricate names.
 
-6. Never fabricate percentages.
+6. Never fabricate email counts.
 
-7. Never fabricate writing patterns.
+7. Never fabricate percentages.
 
-8. Never fabricate topics.
+8. Never fabricate writing patterns.
 
-9. Never fabricate thread behavior.
+9. Never fabricate topics.
 
-10. Never infer a relationship that does not exist in the provided data.
+10. Never fabricate thread behavior.
 
-11. Never merge different Sender → Receiver relationships.
+11. Never infer a relationship that does not exist in the provided data.
 
-12. Never use information from another relationship to complete a missing field.
+12. Never merge different Sender → Receiver relationships.
 
-13. Never use general knowledge to fill missing mailbox information.
+13. Never use information from another relationship to complete a missing field.
 
-14. Every frequency must be calculated from the actual relevant emails.
+14. Never use general knowledge to fill missing mailbox information.
 
-15. Every percentage must be calculated from the actual relevant emails.
+15. Every frequency must be calculated from the actual relevant emails.
 
-16. Every emailsAnalyzed value must be the actual number of relevant emails for that pair.
+16. Every percentage must be calculated from the actual relevant emails.
 
-17. If information is unavailable, use null or [].
+17. Every emailsAnalyzed value must be the actual number of relevant emails for that pair.
 
-18. If evidence is insufficient, lower the confidence level.
+18. If information is unavailable, use null or [].
 
-19. If fewer than 3 relevant emails exist, confidence MUST be Low.
+19. If evidence is insufficient, lower the confidence level.
 
-20. Do not expose sensitive email content verbatim.
+20. If fewer than 3 relevant emails exist, confidence MUST be Low.
 
-21. Describe sensitive information structurally rather than reproducing it.
+21. Do not expose sensitive email content verbatim.
 
-22. Do not generate complete ready-to-send emails.
+22. Describe sensitive information structurally rather than reproducing it.
 
-23. Do not return Markdown.
+23. Do not generate complete ready-to-send emails.
 
-24. Do not return explanations outside the JSON.
+24. Do not return Markdown.
 
-25. Do not return comments inside the JSON.
+25. Do not return explanations outside the JSON.
 
-26. Return ALL qualifying Sender → Receiver profiles.
+26. Do not return comments inside the JSON.
 
-27. Do not return only the first profile.
+27. Return ALL qualifying Sender → Receiver profiles.
 
-28. Do not return only the most frequent profile.
+28. Do not return only the first profile.
 
-29. Do not return only the most recent profile.
+29. Do not return only the most frequent profile.
 
-30. Do not stop processing relationships after finding one profile.
+30. Do not return only the most recent profile.
 
-31. sender.email MUST be a plain email address only.
+31. Do not stop processing relationships after finding one profile.
 
-32. receiver.email MUST be a plain email address only.
+32. sender.email MUST be a plain email address only.
 
-33. Do not return Markdown email links.
+33. receiver.email MUST be a plain email address only.
 
-34. Do not return mailto links.
+34. Do not return Markdown email links.
 
-35. Do not include display names in sender.email or receiver.email.
+35. Do not return mailto links.
+
+36. Do not include display names in sender.email or receiver.email.
 
 ═══════════════════════════════════════
 OUTPUT FORMAT
@@ -474,7 +476,18 @@ The response MUST follow this structure:
             }
           ],
 
-          "ccLogic": null
+          "bcc": [
+            {
+              "name": null,
+              "email": "actual.bcc@example.com",
+              "emailCount": 0,
+              "percentage": 0,
+              "confidence": "Low"
+            }
+          ],
+
+          "ccLogic": null,
+          "bccLogic": null
         },
 
         "topicVariation": [],
@@ -500,74 +513,74 @@ OUTPUT FIELD RULES
 
 patterns:
 
-* Must always be an array.
-* Must contain ALL qualifying Sender → Receiver profiles.
-* Must not contain duplicate Sender → Receiver pairs.
+- Must always be an array.
+- Must contain ALL qualifying Sender → Receiver profiles.
+- Must not contain duplicate Sender → Receiver pairs.
 
 sender.email:
 
-* Must be the exact sender email found in the source data.
-* Must contain ONLY the plain email address.
-* Must NOT contain Markdown.
-* Must NOT contain a mailto link.
-* Must NOT contain a display name.
+- Must be the exact sender email found in the source data.
+- Must contain ONLY the plain email address.
+- Must NOT contain Markdown.
+- Must NOT contain a mailto link.
+- Must NOT contain a display name.
 
 receiver.email:
 
-* Must be the exact primary receiver email found in the source data.
-* Must contain ONLY the plain email address.
-* Must NOT contain Markdown.
-* Must NOT contain a mailto link.
-* Must NOT contain a display name.
+- Must be the exact primary receiver email found in the source data.
+- Must contain ONLY the plain email address.
+- Must NOT contain Markdown.
+- Must NOT contain a mailto link.
+- Must NOT contain a display name.
 
 dataConfidence.emailsAnalyzed:
 
-* Must equal the exact number of relevant emails analyzed for that pair.
+- Must equal the exact number of relevant emails analyzed for that pair.
 
 dataConfidence.level:
 
-* Must be High, Medium, or Low.
-* MUST be Low when emailsAnalyzed < 3.
+- Must be High, Medium, or Low.
+- MUST be Low when emailsAnalyzed < 3.
 
 writingSummary.formality:
 
-* Must be represented as "1/5", "2/5", "3/5", "4/5", or "5/5".
+- Must be represented as "1/5", "2/5", "3/5", "4/5", or "5/5".
 
 recurringPhrases:
 
-* Must contain only phrases actually supported by the analyzed emails.
+- Must contain only phrases actually supported by the analyzed emails.
 
 additionalRecipients:
 
-* Must contain only recipients actually found in the relevant emails.
+- Must contain only recipients actually found in the relevant emails.
 
-cc.emailCount:
+cc.emailCount / bcc.emailCount:
 
-* Must equal the actual number of relevant emails containing that CC recipient.
+- Must equal the actual number of relevant emails containing that CC or BCC recipient.
 
-cc.percentage:
+cc.percentage / bcc.percentage:
 
-* Must equal:
+- Must equal:
 
-  (cc.emailCount / emailsAnalyzed) × 100
+  (emailCount / emailsAnalyzed) × 100
 
-* Round to a reasonable whole number unless the data requires greater precision.
+- Round to a reasonable whole number unless the data requires greater precision.
 
 topicVariation:
 
-* Must be [] when insufficient evidence exists.
+- Must be [] when insufficient evidence exists.
 
 threadBehavior.available:
 
-* Must be true ONLY when actual thread/reverse-direction information is available.
+- Must be true ONLY when actual thread/reverse-direction information is available.
 
 threadBehavior.summary:
 
-* Must be null when thread information is unavailable.
+- Must be null when thread information is unavailable.
 
 suggestions:
 
-* Must contain [] values when evidence is insufficient.
+- Must contain [] values when evidence is insufficient.
 
 Use null for unavailable scalar values.
 
@@ -637,9 +650,9 @@ Before returning the JSON, internally verify:
 
 10. Is emailsAnalyzed accurate for every pair?
 
-11. Are CC counts accurate?
+11. Are CC and BCC counts accurate?
 
-12. Are CC percentages calculated from the correct pair's emails?
+12. Are CC and BCC percentages calculated from the correct pair's emails?
 
 13. Are topic variations supported by evidence?
 

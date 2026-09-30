@@ -1,5 +1,5 @@
 import type { CoachingAnalysis } from "../types";
-import { updateComposeBody } from "@/src/content/gmail/compose-writer";
+import { applyRecipientChanges, updateComposeBody } from "@/src/content/gmail/compose-writer";
 
 const PANEL_ATTRIBUTE = "data-gmail-coach-panel";
 
@@ -12,9 +12,14 @@ export function showSuggestionBox(
 
     if (!suggestionData?.shouldShow || !suggestionData.issues?.length) return;
 
-    const issues = suggestionData.issues.filter((i) =>
-        i.action?.replacement?.trim()
-    );
+    const issues = suggestionData.issues.filter((issue) => {
+        if (issue.type === "RECIPIENT_SUGGESTION") {
+            const action = issue.action;
+            return [action?.addTo, action?.removeTo, action?.addCc, action?.removeCc,
+                action?.addBcc, action?.removeBcc].some((addresses) => addresses?.length);
+        }
+        return Boolean(issue.action?.replacement?.trim());
+    });
     if (!issues.length) return;
 
     if (getComputedStyle(compose).position === "static") {
@@ -48,12 +53,32 @@ export function showSuggestionBox(
     let index = 0;
 
     const render = () => {
-        const replacement = issues[index].action.replacement;
+        const issue = issues[index];
+        const replacement = issue.action.replacement;
         box.replaceChildren();
 
         const text = document.createElement("p");
         text.className = "text";
-        text.textContent = replacement;
+        text.textContent = issue.type === "RECIPIENT_SUGGESTION"
+            ? issue.suggestion || issue.message || issue.title
+            : replacement ?? issue.suggestion ?? issue.message;
+
+        if (issue.type === "RECIPIENT_SUGGESTION") {
+            const changes = [
+                ["To", issue.action.addTo, issue.action.removeTo],
+                ["CC", issue.action.addCc, issue.action.removeCc],
+                ["BCC", issue.action.addBcc, issue.action.removeBcc],
+            ] as const;
+            for (const [field, additions, removals] of changes) {
+                if (!additions?.length && !removals?.length) continue;
+                const line = document.createElement("div");
+                line.textContent = `${field}: ${[
+                    ...(additions ?? []).map((address) => `Add ${address}`),
+                    ...(removals ?? []).map((address) => `Remove ${address}`),
+                ].join("; ")}`;
+                text.append(document.createElement("br"), line);
+            }
+        }
 
         const actions = document.createElement("div");
         actions.className = "actions";
@@ -61,8 +86,19 @@ export function showSuggestionBox(
         const accept = document.createElement("button");
         accept.className = "accept";
         accept.textContent = "Accept";
-        accept.addEventListener("click", () => {
+        accept.addEventListener("click", async () => {
+            accept.disabled = true;
+            if (issue.type === "RECIPIENT_SUGGESTION") {
+                const applied = await applyRecipientChanges(compose, issue);
+                if (applied) host.remove();
+                else {
+                    accept.disabled = false;
+                    text.textContent = "Could not apply every recipient change. Please check the To, CC, and BCC fields and try again.";
+                }
+                return;
+            }
             if (updateComposeBody(compose, replacement, bodyText)) host.remove();
+            else accept.disabled = false;
         });
 
         const reject = document.createElement("button");
